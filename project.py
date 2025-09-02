@@ -34,7 +34,7 @@ bundle = load_bundle()
 model = bundle["model"]
 feature_cols = bundle["feature_cols"]
 grade_to_points = bundle.get("grade_to_points", {"A":4.0, "B+":3.5, "B":3.0, "C+":2.5, "C":2.0, "D+":1.5, "D":1.0, "F":0.0})
-subject_cols = [c for c in feature_cols if c not in ["เพศ", "ชั้นปี", "GPA"]]
+subject_cols = [c for c in feature_cols if c not in ["เพศ", "ชั้นปี", "GPA", "เพศ_หญิง", "เพศ_ชาย"]]
 
 # ---------- UI ----------
 st.title("🔎 ทำนายอาชีพที่เหมาะสมด้วย Data Science")
@@ -53,10 +53,10 @@ with col_right:
     gr_info = st.selectbox("เกรดระบบสารสนเทศเบื้องต้น", grade_options, index=1)
     gr_arch = st.selectbox("เกรดโครงสร้างระบบคอมพิวเตอร์", grade_options, index=2)
     gr_prog = st.selectbox("เกรดการเขียนโปรแกรมคอมพิวเตอร์เบื้องต้น", grade_options, index=0)
-    gr_mkt  = st.selectbox("เกรดหลักการตลาด", grade_options, index=2)
+    gr_mkt  = st.selectbox("เกรดหลักการตลาด", grade_options, index=2)
     gr_logi = st.selectbox("เกรดโลจิสติกส์และการผลิต", grade_options, index=2)
-    gr_biz  = st.selectbox("เกรดโปรแกรมประยุกต์เพื่อทางธุรกิจ", grade_options, index=1)
-    gr_net  = st.selectbox("เกรดเทคโนโลยีอินเทอร์เน็ต", grade_options, index=1)
+    gr_biz  = st.selectbox("เกรดโปรแกรมประยุกต์เพื่อทางธุรกิจ", grade_options, index=1)
+    gr_net  = st.selectbox("เกรดเทคโนโลยีอินเทอร์เน็ต", grade_options, index=1)
     gr_comm = st.selectbox("เกรดระบบการสื่อสารและเครือข่าย 1", grade_options, index=2)
 
 st.markdown("---")
@@ -64,7 +64,7 @@ st.markdown("---")
 btn = st.button("🧠 ทำนายอาชีพที่เหมาะสม", use_container_width=True)
 
 if btn:
-    # จัดข้อมูลอินพุตเป็น 1 แถว ตามลำดับฟีเจอร์ของโมเดล
+    # Organize input data into a single row to match the model's feature order
     person = {
         "เพศ": gender,
         "ชั้นปี": int(year),
@@ -78,22 +78,24 @@ if btn:
         "เทคโนโลยีอินเทอร์เน็ต": gr_net,
         "ระบบการสื่อสารและเครือข่าย 1": gr_comm,
     }
-    row = pd.DataFrame([person])
+    
+    # Create a DataFrame to prepare the input data for the model
+    input_df = pd.DataFrame([person])
 
-    # แปลงเป็นตัวเลขให้ตรงกับฟีเจอร์ของโมเดล
-    row["เพศ"] = row["เพศ"].map({"ชาย":0, "หญิง":1})
+    # Convert gender to a one-hot encoded column to match the training data
+    input_df['เพศ_หญิง'] = input_df['เพศ'].apply(lambda x: 1 if x == 'หญิง' else 0)
+    input_df.drop('เพศ', axis=1, inplace=True)
+
+    # Convert letter grades to numerical points
     for c in subject_cols:
-        row[c] = row[c].map(grade_to_points)
+        input_df[c] = input_df[c].map(grade_to_points)
 
-    # จัดคอลัมน์ตาม model.feature_cols (กันหลงลำดับ)
-    missing = [c for c in feature_cols if c not in row.columns]
-    if missing:
-        st.error(f"คอลัมน์หายไป: {missing}")
-        st.stop()
-    row = row[feature_cols]
+    # Reorder columns to match the model's feature order
+    final_input = input_df[feature_cols]
 
-    pred = model.predict(row)[0]
-    proba = model.predict_proba(row)[0]
+    # Make the prediction
+    pred = model.predict(final_input)[0]
+    proba = model.predict_proba(final_input)[0]
     proba_series = pd.Series(proba, index=model.classes_).sort_values(ascending=False)
 
     st.success(f"🎯 อาชีพที่เหมาะสม: **{pred}**")
@@ -101,13 +103,4 @@ if btn:
     st.bar_chart(proba_series)
 
     with st.expander("ดูข้อมูลอินพุต/ฟีเจอร์ที่ป้อน"):
-        st.dataframe(row, use_container_width=True)
-
-st.sidebar.markdown("### ℹ️ เกี่ยวกับโมเดล")
-st.sidebar.write(
-    "- โมเดล: RandomForest (multi-class)\n"
-    "- ฟีเจอร์: เพศ, ชั้นปี, GPA, เกรด 8 วิชา\n"
-    "- เกรดจะแปลงเป็นคะแนน: A=4, B+=3.5, B=3, C+=2.5, C=2, D+=1.5, D=1, F=0"
-)
-
-
+        st.dataframe(final_input, use_container_width=True)
