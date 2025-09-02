@@ -19,8 +19,7 @@ st.set_page_config(page_title="Career Recommender", layout="wide")
 def load_bundle():
     candidates = [
         Path("career_fit_model.pkl"),
-        Path("artifacts/career_fit_model.pkl"),
-        Path("/mnt/data/career_fit_model.pkl"),  # เผื่อรันในสภาพแวดล้อมโน้ตบุ๊ก
+        
     ]
     for p in candidates:
         if p.exists():
