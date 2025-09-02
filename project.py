@@ -53,10 +53,10 @@ with col_right:
     gr_info = st.selectbox("เกรดระบบสารสนเทศเบื้องต้น", grade_options, index=1)
     gr_arch = st.selectbox("เกรดโครงสร้างระบบคอมพิวเตอร์", grade_options, index=2)
     gr_prog = st.selectbox("เกรดการเขียนโปรแกรมคอมพิวเตอร์เบื้องต้น", grade_options, index=0)
-    gr_mkt  = st.selectbox("เกรดหลักการตลาด", grade_options, index=2)
+    gr_mkt = st.selectbox("เกรดหลักการตลาด", grade_options, index=2)
     gr_logi = st.selectbox("เกรดโลจิสติกส์และการผลิต", grade_options, index=2)
-    gr_biz  = st.selectbox("เกรดโปรแกรมประยุกต์เพื่อทางธุรกิจ", grade_options, index=1)
-    gr_net  = st.selectbox("เกรดเทคโนโลยีอินเทอร์เน็ต", grade_options, index=1)
+    gr_biz = st.selectbox("เกรดโปรแกรมประยุกต์เพื่อทางธุรกิจ", grade_options, index=1)
+    gr_net = st.selectbox("เกรดเทคโนโลยีอินเทอร์เน็ต", grade_options, index=1)
     gr_comm = st.selectbox("เกรดระบบการสื่อสารและเครือข่าย 1", grade_options, index=2)
 
 st.markdown("---")
