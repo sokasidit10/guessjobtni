@@ -10,6 +10,7 @@ streamlit_app.py — แบบฟอร์มทำนาย "อาชีพท
 from pathlib import Path
 import sklearn
 import pickle
+import sklearn
 import pandas as pd
 import streamlit as st
 
